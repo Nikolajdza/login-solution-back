@@ -26,10 +26,10 @@ router.get(
   },
 );
 
-router.get('/microsoft', passport.authenticate('microsoft', { scope: ['user.read'] }));
+router.get('/microsoft', passport.authenticate('azuread-openidconnect', { scope: ['user.read'] }));
 router.get(
   '/microsoft/callback',
-  passport.authenticate('microsoft', {
+  passport.authenticate('azuread-openidconnect', {
     successRedirect: successLoginUrl,
     failureRedirect: failedLoginUrl,
   }),

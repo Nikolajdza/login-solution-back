@@ -1,60 +1,40 @@
 import passport from 'passport';
-import { OIDCStrategy } from 'passport-azure-ad';
+import {
+  OIDCStrategy,
+  VerifyCallback,
+  IProfile,
+} from 'passport-azure-ad';
+import { Request } from 'express';
 import User from '../../models/user.model';
-import jwt, { JwtPayload } from 'jsonwebtoken';
 
-const idmetadata = `${process.env.CLOUD_INSTANCE}${process.env.AZURE_TENANT_ID}/.well-known/openid-configuration`;
-const clientId = process.env.AZURE_CLIENT_ID;
-const clientSecret = process.env.AZURE_CLIENT_SECRET;
-const responseType = 'code id_token';
-const responseMode = 'form_post';
-const redirectUrl = 'ttp://localhost:3000/auth/google/callback';
+const CLIENT_ID = process.env.AZURE_CLIENT_ID!;
+const CLIENT_SECRET = process.env.AZURE_CLIENT_SECRET!;
+const TENANT_ID = process.env.AZURE_TENANT_ID!;
 
 passport.use(new OIDCStrategy({
-  identityMetadata: idmetadata,
-  clientID: clientId!,
-  responseType: responseType,
-  responseMode: responseMode,
-  redirectUrl: redirectUrl,
+  identityMetadata: `https://login.microsoftonline.com/${TENANT_ID}/v2.0/.well-known/openid-configuration`,
+  clientID: CLIENT_ID,
+  clientSecret: CLIENT_SECRET,
+  responseType: 'code id_token',
+  responseMode: 'query',
+  redirectUrl: 'http://localhost:3000/auth/microsoft/callback',
   allowHttpForRedirectUrl: true,
-  clientSecret: clientSecret,
-  validateIssuer: false,
-  isB2C: false,
   passReqToCallback: true,
-  scope: ['openid', 'profile', 'email'],
-  useCookieInsteadOfSession: false,
-  loggingLevel: 'info',
 },
-
-async function (iss: any, sub: any, profile: any, accessToken: any, refreshToken: any, done: any) {
-  const waadProfile = jwt.decode(accessToken) as JwtPayload;
-
-  if (!waadProfile) {
-    return done(new Error('Invalid token'), null);
-  }
-
+async (req: Request, iss: string, sub: string, profile: IProfile, accessToken: string, refreshToken: string, done: VerifyCallback) => {
   try {
-    let user = await User.findOne({ providerId: waadProfile.oid });
-
+    let user = await User.findOne({ providerId: sub }); // Assuming providerId stores unique ID
     if (!user) {
       user = new User({
-        providerId: waadProfile.oid,
         provider: 'microsoft',
-        name: waadProfile.name,
-        email: waadProfile.upn,
-        profilePicture: '',
+        providerId: sub,
+        name: profile.displayName,
+        email: profile.emails[0].value,
       });
-
-      try {
-        await user.save();
-      } catch (saveError) {
-        return done(saveError, null);
-      }
+      await user.save();
     }
-
-    done(null, user);
-  } catch (findError) {
-    done(findError, null);
+    return done(null, user);
+  } catch (err) {
+    return done(err, null);
   }
-},
-));
+}));

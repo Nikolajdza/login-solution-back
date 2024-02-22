@@ -2,7 +2,7 @@ import passport from 'passport';
 import User from '../../models/user.model';
 
 import './google';
-// import './microsoft';
+import './microsoft';
 import './facebook';
 
 passport.serializeUser((user, done) => {
