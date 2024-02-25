@@ -13,6 +13,7 @@ passport.use(new FacebookStrategy({
   profileFields: ['id', 'displayName', 'photos', 'email'],
 },
 async (accessToken, refreshToken, profile, done) => {
+
   try {
     let user = await User.findOne({ providerId: profile.id });
 

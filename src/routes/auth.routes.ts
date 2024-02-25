@@ -24,15 +24,16 @@ router.get(
   (req, res) => handleAuthCallback(req, res, false),
 );
 
-router.get('/microsoft', passport.authenticate('azuread-openidconnect', { scope: ['user.read'] }));
+router.get('/microsoft', passport.authenticate('curity'));
 router.get(
   '/microsoft/callback',
-  passport.authenticate('azuread-openidconnect', {
+  passport.authenticate('curity', {
     successRedirect: successLoginUrl,
     failureRedirect: failedLoginUrl,
   }),
   (req, res) => handleAuthCallback(req, res, false),
 );
+
 
 router.get('/facebook', passport.authenticate('facebook'));
 

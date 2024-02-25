@@ -2,8 +2,9 @@ import passport from 'passport';
 import User from '../../models/user.model';
 
 import './google';
-import './microsoft';
 import './facebook';
+import { createCurityClient } from './azure'; // import the function from azure.ts
+
 
 passport.serializeUser((user, done) => {
   done(null, user);
@@ -18,6 +19,8 @@ passport.deserializeUser(async (id, done) => {
     done(error, null);
   }
 });
+
+createCurityClient();
 
 
 export default passport;
