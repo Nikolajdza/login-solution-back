@@ -1,8 +1,8 @@
-import express from 'express';
+import { Request, Response } from 'express';
 import { UserDocument } from '../models/user.model';
 import { generateJWT } from '../services/jwt.service';
 
-const getUserDetails = async (req: express.Request, res: express.Response) => {
+const getUserDetails = async (req: Request, res: Response) => {
   try {
     const user = req.user as UserDocument;
     const token = generateJWT(user);

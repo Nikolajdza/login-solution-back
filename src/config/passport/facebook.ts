@@ -1,11 +1,15 @@
 import passport from 'passport';
 import { Strategy as FacebookStrategy } from 'passport-facebook';
 import User from '../../models/user.model';
+import { AppConfig } from '../configuration.types';
+import { configuration } from '../configuration';
+
+const appConfig: AppConfig = configuration.app;
 
 passport.use(new FacebookStrategy({
-  clientID: process.env.FACEBOOK_CLIENT_ID!,
-  clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
-  callbackURL: 'http://localhost:3000/auth/facebook/callback',
+  clientID: appConfig.facebookClientId!,
+  clientSecret: appConfig.facebookClientSecret!,
+  callbackURL: appConfig.facebookCallbackUrl!,
   profileFields: ['id', 'displayName', 'photos', 'email'],
 },
 async (accessToken, refreshToken, profile, done) => {

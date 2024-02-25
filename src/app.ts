@@ -11,14 +11,25 @@ import session from 'express-session';
 import passport from 'passport';
 import './config/passport';
 import * as middlewares from './middlewares/middlewares';
+import { rateLimit } from 'express-rate-limit';
+import { AppConfig } from './config/configuration.types';
+import { configuration } from './config/configuration';
 
 const app = express();
+const appConfig: AppConfig = configuration.app;
 
 app.use(session({
-  secret: process.env.SESSION_SECRET!,
+  secret: appConfig.sessionSecret!,
   resave: false,
   saveUninitialized: true,
 }));
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 100,
+});
+
+app.use(limiter);
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -29,7 +40,7 @@ app.use(helmet());
 app.use(bodyParser.json());
 
 app.use(cors({
-  origin: 'http://localhost:8000',
+  origin: appConfig.corsOrigin,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
 }));

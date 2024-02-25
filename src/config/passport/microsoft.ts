@@ -6,18 +6,19 @@ import {
 } from 'passport-azure-ad';
 import { Request } from 'express';
 import User from '../../models/user.model';
+import { AppConfig } from '../configuration.types';
+import { configuration } from '../configuration';
 
-const CLIENT_ID = process.env.AZURE_CLIENT_ID!;
-const CLIENT_SECRET = process.env.AZURE_CLIENT_SECRET!;
-const TENANT_ID = process.env.AZURE_TENANT_ID!;
+const appConfig: AppConfig = configuration.app;
+const tenantId = appConfig.azureTenantId;
 
 passport.use(new OIDCStrategy({
-  identityMetadata: `https://login.microsoftonline.com/${TENANT_ID}/v2.0/.well-known/openid-configuration`,
-  clientID: CLIENT_ID,
-  clientSecret: CLIENT_SECRET,
+  identityMetadata: `https://login.microsoftonline.com/${tenantId}/v2.0/.well-known/openid-configuration`,
+  clientID: appConfig.azureClientId!,
+  clientSecret: appConfig.azureClientSecret,
   responseType: 'code id_token',
   responseMode: 'query',
-  redirectUrl: 'http://localhost:3000/auth/microsoft/callback',
+  redirectUrl: appConfig.azureCallbackUrl!,
   allowHttpForRedirectUrl: true,
   passReqToCallback: true,
 },

@@ -1,14 +1,16 @@
 import express from 'express';
 import passport from 'passport';
-import { generateJWT } from '../services/jwt.service';
-import { UserDocument } from '../models/user.model';
 import requireAuth from '../middlewares/auth.middleware';
 import getUserDetails from '../controllers/user.controller';
+import { handleAuthCallback } from '../controllers/auth.controller';
+import { AppConfig } from '../config/configuration.types';
+import { configuration } from '../config/configuration';
 
 const router = express.Router();
+const appConfig: AppConfig = configuration.app;
 
-const successLoginUrl = 'http://localhost:8000/login/success';
-const failedLoginUrl = 'http://localhost:8000/login/error';
+const successLoginUrl = appConfig.successfullLoginUrl;
+const failedLoginUrl = appConfig.failedLoginUrl;
 
 router.get('/user', requireAuth, getUserDetails);
 
@@ -19,11 +21,7 @@ router.get(
     successRedirect: successLoginUrl,
     failureRedirect: failedLoginUrl,
   }),
-  (req, res) => {
-    const token = generateJWT(req.user as UserDocument);
-
-    res.cookie('token', token, { httpOnly: false });
-  },
+  (req, res) => handleAuthCallback(req, res, false),
 );
 
 router.get('/microsoft', passport.authenticate('azuread-openidconnect', { scope: ['user.read'] }));
@@ -33,11 +31,7 @@ router.get(
     successRedirect: successLoginUrl,
     failureRedirect: failedLoginUrl,
   }),
-  (req, res) => {
-    const token = generateJWT(req.user as UserDocument);
-
-    res.cookie('token', token, { httpOnly: true });
-  },
+  (req, res) => handleAuthCallback(req, res, false),
 );
 
 router.get('/facebook', passport.authenticate('facebook'));
@@ -48,11 +42,7 @@ router.get(
     successRedirect: successLoginUrl,
     failureRedirect: failedLoginUrl,
   }),
-  (req, res) => {
-    const token = generateJWT(req.user as UserDocument);
-
-    res.cookie('token', token, { httpOnly: true });
-  },
+  (req, res) => handleAuthCallback(req, res, false),
 );
 
 export default router;
