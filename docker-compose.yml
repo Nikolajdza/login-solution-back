@@ -1,12 +1,13 @@
 version: '3.8'
-
 services:
-  db:
+  dev-db:
     image: mongo:latest
     ports:
-      - "27017:27017" # Expose MongoDB's default port
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     volumes:
       - mongodb_data:/data/db
-
 volumes:
   mongodb_data:

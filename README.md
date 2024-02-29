@@ -46,8 +46,7 @@ npm install
 1. Build the Docker image and start the services defined in docker-compose.yml:
 
 ```   
-docker build -t my-api-name .
-docker-compose up
+npm run db:dev:up
 ```
 
 Remember to replace `my-api-name` with the actual name of your Docker image.
